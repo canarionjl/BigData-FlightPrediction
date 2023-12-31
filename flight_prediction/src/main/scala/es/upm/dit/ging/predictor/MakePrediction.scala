@@ -7,6 +7,8 @@ import org.apache.spark.ml.feature.{Bucketizer, StringIndexerModel, VectorAssemb
 import org.apache.spark.sql.functions.{concat, from_json, lit}
 import org.apache.spark.sql.types.{DataTypes, StructType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.functions.expr
+
 
 object MakePrediction {
 
@@ -18,6 +20,7 @@ object MakePrediction {
       .appName("StructuredNetworkWordCount")
       .master("local[*]")
       .getOrCreate()
+      
     import spark.implicits._
 
     //Load the arrival delay bucketizer
@@ -133,8 +136,9 @@ object MakePrediction {
       .drop("Features_vec")
 
     // Drop the features vector and prediction metadata to give the original fields
-    val finalPredictions = predictions.drop("indices").drop("values").drop("rawPrediction").drop("probability")
-
+    var finalPredictions = predictions.drop("indices").drop("values").drop("rawPrediction").drop("probability")
+     
+    finalPredictions = finalPredictions.withColumn ("id",expr("uuid()"))
     // Inspect the output
     finalPredictions.printSchema()
 
@@ -146,7 +150,9 @@ object MakePrediction {
     //  (batchDF: DataFrame, batchId: Long) =>
     //    MongoSpark.save(batchDF,writeConfig)
     //}.start()
-
+	
+	
+    
     // define a streaming query
     val dataStreamWriter = finalPredictions
 
@@ -155,16 +161,31 @@ object MakePrediction {
       //.schema(finalPredictions.schema)
       //.load()
       // manipulate your streaming data
-      .writeStream
+      
+      /*.writeStream
       .format("mongodb")
       .option("spark.mongodb.connection.uri", "mongodb://127.0.0.1:27017")
       .option("spark.mongodb.database", "agile_data_science")
       .option("checkpointLocation", "/tmp")
       .option("spark.mongodb.collection", "flight_delay_classification_response")
       .outputMode("append")
+      */
+      
 
+	.writeStream
+	.format("org.apache.spark.sql.cassandra")
+	.option("spark.cassandra.connection.host", "localhost") 
+	.option("spark.cassandra.connection.port", "9042")        
+	.option("spark.cassandra.output.consistency.level", "LOCAL_ONE")  
+	.option("keyspace", "agile_data_science") 
+	.option("table", "flight_delay_classification_response")  
+	.option("checkpointLocation", "/tmp")
+	.outputMode("append")
+	.start()
+	  		
     // run the query
-    val query = dataStreamWriter.start()
+    val query = dataStreamWriter.awaitTermination()
+    
     // Console Output for predictions
 
     val consoleOutput = finalPredictions.writeStream

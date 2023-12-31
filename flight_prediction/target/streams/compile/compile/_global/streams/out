@@ -1,0 +1,7 @@
+[0m[[0m[31merror[0m] [0m[0m/home/ibdn/Desktop/practica_creativa/flight_prediction/src/main/scala/es/upm/dit/ging/predictor/MakePrediction.scala:139:41: value withColunm is not a member of org.apache.spark.sql.DataFrame[0m
+[0m[[0m[31merror[0m] [0m[0m    finalPredictions = finalPredictions.withColunm ("id",expr("uuid()"))[0m
+[0m[[0m[31merror[0m] [0m[0m                                        ^[0m
+[0m[[0m[31merror[0m] [0m[0m/home/ibdn/Desktop/practica_creativa/flight_prediction/src/main/scala/es/upm/dit/ging/predictor/MakePrediction.scala:139:58: not found: value expr[0m
+[0m[[0m[31merror[0m] [0m[0m    finalPredictions = finalPredictions.withColunm ("id",expr("uuid()"))[0m
+[0m[[0m[31merror[0m] [0m[0m                                                         ^[0m
+[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m
