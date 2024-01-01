@@ -138,7 +138,7 @@ object MakePrediction {
     // Drop the features vector and prediction metadata to give the original fields
     var finalPredictions = predictions.drop("indices").drop("values").drop("rawPrediction").drop("probability")
      
-    finalPredictions = finalPredictions.withColumn ("id",expr("uuid()"))
+    
     // Inspect the output
     finalPredictions.printSchema()
 

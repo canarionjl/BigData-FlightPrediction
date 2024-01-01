@@ -1,6 +1,10 @@
 import sys, os, re
 from flask import Flask, render_template, request
+
 from pymongo import MongoClient
+
+
+
 from bson import json_util
 
 # Configuration details
@@ -12,7 +16,15 @@ import predict_utils
 # Set up Flask, Mongo and Elasticsearch
 app = Flask(__name__)
 
+
 client = MongoClient()
+
+# Importing and connecting to Cassandra DB
+
+from cassandra.cluster import Cluster
+cluster = Cluster()
+session = cluster.connect("agile_data_science")
+
 
 from pyelasticsearch import ElasticSearch
 elastic = ElasticSearch(config.ELASTIC_URL)
@@ -30,6 +42,10 @@ PREDICTION_TOPIC = 'flight_delay_classification_request'
 
 import uuid
 
+
+
+
+
 # Chapter 5 controller: Fetch a flight and display it
 @app.route("/on_time_performance")
 def on_time_performance():
@@ -45,6 +61,10 @@ def on_time_performance():
   })
   
   return render_template('flight.html', flight=flight)
+  
+  
+  
+  
 
 # Chapter 5 controller: Fetch all flights between cities on a given day and display them
 @app.route("/flights/<origin>/<dest>/<flight_date>")
@@ -70,6 +90,12 @@ def list_flights(origin, dest, flight_date):
     flight_count=flight_count
   )
 
+
+
+
+
+
+
 # Controller: Fetch a flight table
 @app.route("/total_flights")
 def total_flights():
@@ -89,6 +115,10 @@ def total_flights_json():
       ('Month', 1)
     ])
   return json_util.dumps(total_flights, ensure_ascii=False)
+  
+  
+  
+  
 
 # Controller: Fetch a flight chart
 @app.route("/total_flights_chart")
@@ -99,6 +129,12 @@ def total_flights_chart():
       ('Month', 1)
     ])
   return render_template('total_flights_chart.html', total_flights=total_flights)
+
+
+
+
+
+
 
 @app.route("/airplanes")
 @app.route("/airplanes/")
@@ -172,11 +208,24 @@ def search_airplanes():
     nav_offsets=nav_offsets,
   )
 
+
+
+
+
+
+
+
 @app.route("/airplanes/chart/manufacturers.json")
 @app.route("/airplanes/chart/manufacturers.json")
 def airplane_manufacturers_chart():
   mfr_chart = client.agile_data_science.airplane_manufacturer_totals.find_one()
   return json.dumps(mfr_chart)
+
+
+
+
+
+
 
 # Controller: Fetch a flight and display it
 @app.route("/airplane/<tail_number>")
@@ -190,6 +239,11 @@ def flights_per_airplane(tail_number):
     flights=flights,
     tail_number=tail_number
   )
+
+
+
+
+
 
 # Controller: Fetch an airplane entity page
 @app.route("/airline/<carrier_code>")
@@ -207,6 +261,12 @@ def airline(carrier_code):
     carrier_code=carrier_code
   )
 
+
+
+
+
+
+
 # Controller: Fetch an airplane entity page
 @app.route("/")
 @app.route("/airlines")
@@ -214,6 +274,16 @@ def airline(carrier_code):
 def airlines():
   airlines = client.agile_data_science.airplanes_per_carrier.find()
   return render_template('all_airlines.html', airlines=airlines)
+
+
+
+
+
+
+
+
+
+
 
 @app.route("/flights/search")
 @app.route("/flights/search/")
@@ -287,6 +357,12 @@ def search_flights():
     flight_number=flight_number
     )
 
+
+
+
+
+
+
 @app.route("/delays")
 def delays():
   return render_template('delays.html')
@@ -299,6 +375,13 @@ from os import environ
 project_home = os.environ["PROJECT_HOME"]
 # vectorizer = joblib.load("{}/models/sklearn_vectorizer.pkl".format(project_home))
 # regressor = joblib.load("{}/models/sklearn_regressor.pkl".format(project_home))
+
+
+
+
+
+
+
 
 # Make our API a post, so a search engine wouldn't hit it
 @app.route("/flights/delays/predict/regress", methods=['POST'])
@@ -342,6 +425,12 @@ def regress_flight_delays():
   result_obj = {"Delay": result}
   return json.dumps(result_obj)
 
+
+
+
+
+
+
 @app.route("/flights/delays/predict")
 def flight_delays_page():
   """Serves flight delay predictions"""
@@ -356,6 +445,13 @@ def flight_delays_page():
   ]
   
   return render_template('flight_delays_predict.html', form_config=form_config)
+
+
+
+
+
+
+
 
 # Make our API a post, so a search engine wouldn't hit it
 @app.route("/flights/delays/predict/classify", methods=['POST'])
@@ -401,6 +497,11 @@ def classify_flight_delays():
   )
   return json_util.dumps(prediction_features)
 
+
+
+
+
+
 @app.route("/flights/delays/predict_batch")
 def flight_delays_batch_page():
   """Serves flight delay predictions"""
@@ -415,6 +516,11 @@ def flight_delays_batch_page():
   ]
   
   return render_template("flight_delays_predict_batch.html", form_config=form_config)
+  
+  
+  
+  
+  
 
 @app.route("/flights/delays/predict_batch/results/<iso_date>")
 def flight_delays_batch_results_page(iso_date):
@@ -442,6 +548,10 @@ def flight_delays_batch_results_page(iso_date):
     predictions=predictions,
     iso_date=iso_date
   )
+
+
+
+
 
 # Make our API a post, so a search engine wouldn't hit it
 @app.route("/flights/delays/predict/classify_realtime", methods=['POST'])
@@ -495,6 +605,12 @@ def classify_flight_delays_realtime():
   response = {"status": "OK", "id": unique_id}
   return json_util.dumps(response)
 
+
+
+
+
+
+
 @app.route("/flights/delays/predict_kafka")
 def flight_delays_page_kafka():
   """Serves flight delay prediction page with polling form"""
@@ -509,28 +625,52 @@ def flight_delays_page_kafka():
   
   return render_template('flight_delays_predict_kafka.html', form_config=form_config)
 
+
+
+
 @app.route("/flights/delays/predict/classify_realtime/response/<unique_id>")
 def classify_flight_delays_realtime_response(unique_id):
-  """Serves predictions to polling requestors"""
-  
-  prediction = client.agile_data_science.flight_delay_classification_response.find_one(
-    {
-      "UUID": unique_id
-    }
-  )
-  
+
   response = {"status": "WAIT", "id": unique_id}
-  if prediction:
-    response["status"] = "OK"
-    response["prediction"] = prediction
   
+  try:
+  	
+    prediction = session.execute("SELECT * FROM flight_delay_classification_response " +'WHERE "UUID" = '+f"'{unique_id}'")
+  
+    results = list(prediction)
+ 
+    rows_as_dict = [{key: getattr(row, key) for key in row._fields} for row in results] 
+  
+
+    json_data = json.dumps(rows_as_dict, default=str).replace("[","").replace("]","")
+  
+  
+    res = json.loads(json_data)
+  
+    if json_data:
+      response["status"] = "OK"
+      response["prediction"] = res
+      
+  except Exception as e:
+    pass
+    
   return json_util.dumps(response)
+  
+  
+  
+  
+  
+  
+  
 
 def shutdown_server():
   func = request.environ.get('werkzeug.server.shutdown')
   if func is None:
     raise RuntimeError('Not running with the Werkzeug Server')
   func()
+
+
+
 
 @app.route('/shutdown')
 def shutdown():
