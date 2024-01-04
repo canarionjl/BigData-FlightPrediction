@@ -242,8 +242,8 @@ Please, note that in order to use spark-submit you first need to compile the cod
   ## Check the predictions records inserted in MongoDB
   ```
    $ mongo
-   > use use agile_data_science;
-   >db.flight_delay_classification_response.find();
+   > use agile_data_science;
+   > db.flight_delay_classification_response.find();
   
   ```
   You must have a similar output as:
@@ -299,6 +299,25 @@ Vistit http://localhost:8080/home for the web version of Apache Airflow.
 
 ![Apache Airflow DAG success](images/airflow.jpeg)
 
+
+### Commands for developing the project (done by me)
+
+- Start spark-submit (using Cassandra as DB)
+
+   ```shell
+  spark-submit --class "es.upm.dit.ging.predictor.MakePrediction" --packages com.datastax.spark:spark-cassandra-connector_2.12:3.4.1,org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0 target/scala-2.12/flight_prediction_2.12-0.1.jar
+     
+  ``` 
+  
+ - Configuring Cassandra
+ 
+  ```
+  $cqlsh
+  > create keyspace agile_data_science WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 1};
+  > use agile_data_science; 
+  > create table flight_delay_classification_response ("Origin" text, "DayOfWeek" int, "DayOfYear" int, "DayOfMonth" int, "Dest" text, "DepDelay" double, "Timestamp" timestamp, "FlightDate" timestamp, "Carrier" text,"UUID" text PRIMARY KEY, "Distance" double, "Route" text, "Prediction" double);
+  
+  ``` 
 
 
 

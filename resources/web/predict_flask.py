@@ -576,8 +576,10 @@ def classify_flight_delays_realtime():
   
   # Set the direct values, which excludes Date
   prediction_features = {}
+  
   for key, value in api_form_values.items():
     prediction_features[key] = value
+  prediction_features['Distance'] = 0
   
   # Set the derived values
   prediction_features['Distance'] = predict_utils.get_flight_distance(
