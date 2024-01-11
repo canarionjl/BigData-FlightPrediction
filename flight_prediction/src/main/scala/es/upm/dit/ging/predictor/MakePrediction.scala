@@ -24,7 +24,7 @@ object MakePrediction {
     import spark.implicits._
 
     //Load the arrival delay bucketizer
-    val base_path= "/home/ibdn/Desktop/practica_creativa"
+    val base_path= ".."
     val arrivalBucketizerPath = "%s/models/arrival_bucketizer_2.0.bin".format(base_path)
     print(arrivalBucketizerPath.toString())
     val arrivalBucketizer = Bucketizer.load(arrivalBucketizerPath)
@@ -49,7 +49,7 @@ object MakePrediction {
     val df = spark
       .readStream
       .format("kafka")
-      .option("kafka.bootstrap.servers", "localhost:9092")
+      .option("kafka.bootstrap.servers", "kafka:9092")
       .option("subscribe", "flight_delay_classification_request")
       .load()
     df.printSchema()
@@ -174,7 +174,7 @@ object MakePrediction {
 
 	.writeStream
 	.format("org.apache.spark.sql.cassandra")
-	.option("spark.cassandra.connection.host", "localhost") 
+	.option("spark.cassandra.connection.host", "cassandra") 
 	.option("spark.cassandra.connection.port", "9042")        
 	.option("spark.cassandra.output.consistency.level", "LOCAL_ONE")  
 	.option("keyspace", "agile_data_science") 

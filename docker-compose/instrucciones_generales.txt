@@ -1,0 +1,54 @@
+# Instrucciones generales para la instalacion de docker
+# importante siempre
+sudo apt update
+
+# instalamos el demonio de docker y el comando
+sudo apt install docker.io
+
+# configurar que en el inicio se levante el demonio siempre
+sudo systemctl enable docker
+
+# levantar el demonio (la primera vez, hay que hacerlo)
+sudo service docker start
+
+# comprobar que el comando docker esta instalado
+docker --version
+
+# comprobar que el demonio de docker esta levantado
+# +--- si sale la tabla es que esta encendido
+# |	"CONTAINER ID        NAME                CPU %               MEM USAGE / LIMIT   MEM 
+# |	%               NET I/O             BLOCK I/O           PIDS
+# |
+# +--- y si sale "Cannot connect ....[mucho texto]... Is the docker daemon running?" esta apagado
+sudo docker stats --no-stream
+
+# crear el grupo docker (que deberia estar ya creado)
+sudo groupadd docker
+
+# anyadirnos al grupo
+sudo usermod -aG docker upm
+
+# reiniciar la maquina virtual o bien re-loggearnos con el comando 
+sudo su - upm
+
+# comprobar que funciona todo correctamente
+# +--- si sale "docker: Got permission denied while trying to connect to the Docker daemon" es que no ha funcionado
+# +--- si sale "Unable to find image 'hello-world:latest' locally
+#               latest: Pulling from library/hello-world
+#               0e03bdcc26d7: Pull complete 
+#               ...[mucho texto]...
+#               Hello from Docker!" --> es que esta bien
+docker run hello-world
+
+
+# para ver los contenedores
+docker stats --no-stream
+
+
+##################
+# DOCKER-COMPOSE #
+##################
+# instalar docker compose
+sudo curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+

@@ -1,0 +1,13 @@
+# Para levantar docker compose, solo necesitamos construir las imagenes de docker
+# a no ser que estén en dockerhub
+cd mongo_seed
+docker build -t jlmendo11/mongo_seed .
+
+cd flask2
+docker build -t jlmendo11/flask2 .
+
+cd spark3
+docker build -t jlmendo11/spark3 .
+
+# Levantar docker-compose
+docker-compose up
