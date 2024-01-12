@@ -130,8 +130,24 @@ services:
 
     networks:
 
-      - red1  
+      - red1 
+
+  
+  cassandra_seed:
+
+    container_name: cassandra_seed
+
+    image: cassandra_seed
+
+    depends_on:
+    
+      - cassandra
+
+    networks:
+
+      - red1 
       
+  
   spark:
 
     image: jlmendo11/spark3

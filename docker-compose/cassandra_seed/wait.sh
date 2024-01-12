@@ -2,8 +2,8 @@
 
 echo "Esperando 3 minutos por Cassandra..."
 
-sleep 180
+sleep 120
 
 echo "Cassandra should be ready"
 
-cqlsh 172.19.0.2 9042 -f /scripts/script.cql
+cqlsh cassandra 9042 -f /scripts/script.cql
