@@ -113,29 +113,25 @@ services:
 
       - "mongoimport --host mongo --port 27017 -d agile_data_science -c origin_dest_distances --mode upsert --type json --file /origin_dest_distances.jsonl"
 
-      - "mongo agile_data_science --eval 'db.origin_dest_distances.ensureIndex({Origin: 1, Dest: 1})'"
+      # - "mongo agile_data_science --eval 'db.origin_dest_distances.ensureIndex({Origin: 1, Dest: 1})'"
 
-      
 
   cassandra:
 
     container_name: cassandra
 
-    image: cassandra_seed
+    image: cassandra:4.1.3
 
     ports:
 
       - "9042:9042"
-
+  
     hostname: cassandra
 
     networks:
 
       - red1  
       
-  
-
-   
   spark:
 
     image: jlmendo11/spark3
@@ -179,6 +175,8 @@ services:
       - mongo_seed
 
       - spark
+      
+      - cassandra
 
     hostname: flask
 
