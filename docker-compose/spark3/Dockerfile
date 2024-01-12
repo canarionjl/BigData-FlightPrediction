@@ -1,4 +1,4 @@
-FROM bitnami/spark:3.3.0
+FROM bde2020/spark-submit:3.3.0-hadoop3.3
 
 USER root
 
